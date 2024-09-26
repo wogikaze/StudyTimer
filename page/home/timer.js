@@ -1,15 +1,15 @@
 import VisLog from "@silver-zepp/vis-log";
+import { BasePage } from "@zeppos/zml/base-page";
 import { getDeviceInfo } from '@zos/device';
+import { pauseDropWristScreenOff, setPageBrightTime } from '@zos/display';
 import { back } from "@zos/router";
 import { Vibrator, VIBRATOR_SCENE_NOTIFICATION } from "@zos/sensor";
 import { align, createWidget, deleteWidget, event, prop, text_style, updateStatusBarTitle, widget } from "@zos/ui";
 import { log as Logger } from "@zos/utils";
 import { ZeppTimer } from "../../libs/zeppos_timer"; // Replace with the path to your zeppos_timer.js
 import { DoneButton, padding_top, QuitButton, SelectTimerARC, TimerARC, TimerCountTEXT, TimerTEXT } from "./timer.s.layout";
-import { BasePage } from "@zeppos/zml/base-page";
 const vis = new VisLog("index.js");
 const logger = Logger.getLogger("timer-page");
-import { getAutoBrightness } from '@zos/display'
 
 const { width: DEVICE_WIDTH, height: DEVICE_HEIGHT } = getDeviceInfo();
 Page(
@@ -116,6 +116,15 @@ Page(
                 // timer start
                 this.state.startDate = new Date();
                 const viewTimer = new CountdownTimer(parseFloat(this.state.timer));
+                const result = setPageBrightTime({
+                    brightTime: 1E6 * parseFloat(this.state.timer),
+                });
+                // don't turn off the screen on wrist down for 10 min
+                pauseDropWristScreenOff({
+                    duration: 1E6 * parseFloat(this.state.timer),
+                });
+
+
                 const WhenEndTimer = () => {
                     this.state.endDate = new Date();
                     clearAllWidget([TimerText, arc, button0, button1]);
